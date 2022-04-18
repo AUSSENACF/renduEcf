@@ -1,0 +1,26 @@
+{
+  "name": "ecf_eco_it",
+  "version": "1.0.0",
+  "description": "ecoIt Projet ECF",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "watch": "nodemon server.js",
+    "client": "cd client && npm start",
+    "build":" cd client && npm run build"
+  },
+  "author": "François AUSSENAC",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^4.17.3",
+    "multer": "^1.4.4",
+    "path": "^0.12.7",
+    "sqlite3": "^5.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
+}

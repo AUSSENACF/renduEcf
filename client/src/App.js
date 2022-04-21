@@ -4,29 +4,32 @@ import './App.css';
 import {Button, Modal, Form } from 'react-bootstrap'
 import axios from 'axios'
 import ProfilTeacher from './component/ProfilTeacher';
+import FormationList from './component/formationList';
+import ActiveFormation from './component/ActiveFormation';
+import AdminProfilTeacherList from './component/AdminProfilTeacherList';
 
 export default class App extends Component {
   constructor() {
     super();
     this.state = {
-      currentConnectStatus: "Guest",
+      currentConnectStatus: "Guest", //status connected currently
       showModalLogin : false, // state show or hide of Log modal after click on login button
       showModalSignIn : false, // state show or hide of Sign modal after click on SignIn button
       signInStatus : 'Guest', // status of SignIN data, for Show different SignIn Form and save status if Form submit
       profilImgFile : null, // state of profil img file use if signInStatus = professeur
-      exempleprofilImgFile:null,
+      exempleprofilImgFile:null, // exemple show when teacher choosing photo profil
       pseudo:'', // state of pseudo or name if in Professeur signInStatus
       mail :['',false], // state of mail
       password:'', // state of password
       firstname:'', // state of firstname use if signInStatus = professeur
-      description:'' // state of description use if signInStatus = professeur 
+      description:'', // state of description use if signInStatus = professeur 
+      showedStudentPage: 0 // curent page visible when "Apprenant" navigate in formation page 
     }
     // func call on Login form Submit
     this.handleClickLoginWithSubmit = () => { 
       axios.post('/logIn', {message:[this.state.mail,this.state.password]}).then(resp => 
       {
-        this.setState({currentConnectStatus : resp.data.status})
-        console.log("alez")
+        this.setState({currentConnectStatus : resp.data.status}) //changing current connected status for show other page
       });
       this.handleClickLogin(); // call modal login close
     };
@@ -108,10 +111,8 @@ export default class App extends Component {
     this.handleChangeMail = (e)=>{ // change mail state if regex mail is ok with input
       var mailformat = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
       if(e.target.value.match(mailformat))
-      {
-      // A FAIRE PROCHAINEMENT if mail not already present in DB   
+      {  
       this.setState({mail : [e.target.value,true]});
-      console.log(this.state.mail);
       }
     }
 
@@ -138,7 +139,9 @@ export default class App extends Component {
     this.handleChangeDescription = (e)=>{ // change description state with input value
       this.setState({description : e.target.value})
     };
+    
   }
+  handleCallBackFormation = (data)=>(this.setState({showedStudentPage: data})); // Callback function to get the new id of futur page showed
 
 
   render() {
@@ -162,51 +165,68 @@ export default class App extends Component {
     //condition for show SignIn form "Apprenant" or "Professeur"
     if(this.state.signInStatus === 'Apprenant'){ // form called if button switch of modal signIn body is on "Apprenant"
       SignInForm = 
-        <>
-          <p>E-mail: <input type='email' placeholder='votre e-mail' onChange = {this.handleChangeMail}></input></p>
-          <p>Pseudo: <input type='texte' placeholder='votre pseudo' onChange = {this.handleChangePseudo}></input></p>
-          <p>Mot de passe: <input type='password' placeholder='votre mot de passe' onChange = {this.handleChangePassword}></input></p>
-        </>
+        <div className='container-fluid'>
+          <div className='row mt-3'><p className='col-3'>E-mail: </p><input className='col-9' type='email' placeholder='votre e-mail' onChange = {this.handleChangeMail}></input></div>
+          <div className='row mt-3'><p className='col-3'>Pseudo: </p><input className='col-9' type='texte' placeholder='votre pseudo' onChange = {this.handleChangePseudo}></input></div>
+          <div className='row mt-3'><p className='col-3'>Mot de passe: </p><input className='col-9' type='password' placeholder='votre mot de passe' onChange = {this.handleChangePassword}></input></div>
+        </div>
       }else{    // form called if button switch of modal signIn body is on "Instructeur" 
       SignInForm =
-        <>
+        <div className='container-fluid'>
           <p>les champs avec un "*" sont obligatoire</p>
-          <p>E-mail *: <input type='email' placeholder='votre e-mail' onChange = {this.handleChangeMail}></input></p>
-          <p>Nom *: <input type='texte' placeholder='votre nom' onChange = {this.handleChangePseudo}></input></p>
-          <p>Prenom: <input type='texte' placeholder='votre prenom' onChange={this.handleChangeFirstname}  ></input></p>
-          <p>mot de passe *: <input type='password' placeholder='votre mot de passe' onChange = {this.handleChangePassword}></input></p>
-          <p>photo de profil:  <input type="file" onChange={this.handleChangeProfilImgFile} /> {/*Choose profil IMG Button*/} <img src={this.state.exempleprofilImgFile}/>{/*show image selected*/}</p>
-          <p>Description: <br/>
-          <textarea type='texte' placeholder='decrivez vous' onChange={this.handleChangeDescription} ></textarea>
-          </p>
-        </>
+          <div className='row mt-3'><p className='col-3'>E-mail *:</p><input className='col-9' type='email' placeholder='votre e-mail' onChange = {this.handleChangeMail}></input></div>
+          <div className='row mt-3'><p className='col-3'>Nom *:</p><input className='col-9' type='texte' placeholder='votre nom' onChange = {this.handleChangePseudo}></input></div>
+          <div className='row mt-3'><p className='col-3'>Prenom:</p><input className='col-9' type='texte' placeholder='votre prenom' onChange={this.handleChangeFirstname}  ></input></div>
+          <div className='row mt-3'><p className='col-3'>mot de passe *:</p><input className='col-9' type='password' placeholder='votre mot de passe' onChange = {this.handleChangePassword}></input></div>
+          <div className='row mt-3'><p className='col-3'>photo de profil:</p><input className='col-9'  type="file" onChange={this.handleChangeProfilImgFile} /> {/*Choose profil IMG Button*/} <img src={this.state.exempleprofilImgFile}/>{/*show image selected*/}</div>
+          <div className='row mt-3'><p className='col-3'>Description: <br/></p><textarea className='col-9 pb-5' type='texte' placeholder='decrivez vous' onChange={this.handleChangeDescription} ></textarea></div>
+        </div>
       };
 
     // main page called depending on status value
     if(this.state.currentConnectStatus === "Professeur"){
       maincontent = 
         <ProfilTeacher  mail = {this.state.mail[0]}  />
+    }else if(this.state.currentConnectStatus === "Apprenant"){
+      // main sutdent page called depending upon the id  
+      if(this.state.showedStudentPage === 0 ){// id of Formation list page
+      maincontent =   
+        <FormationList parentCallBackFormation={this.handleCallBackFormation}/>
+      }else{// id of formation 
+        maincontent = 
+        <ActiveFormation formationID = {this.state.showedStudentPage}/>
+      }
+    }else if(this.state.currentConnectStatus === "Admin"){
+      maincontent = 
+        <AdminProfilTeacherList/>
+    }else{
+      maincontent = <h1>Bienvenue</h1>
     }
     
 
     return (
     <>  
-      <header>
-      <p>mettre un Logo </p>
-          <Button className= 'classename define' onClick = {this.handleClickLogin}>Connection</Button>  {/*Button to show modal login*/}
+      <header className='Container-fluid'>
+        <div className='row'>
+          <h1 className='col-4 col-lg-3'>
+            <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" fill="currentColor" className="bibitree" viewBox="0 0 16 16">
+              <path d="M8.416.223a.5.5 0 0 0-.832 0l-3 4.5A.5.5 0 0 0 5 5.5h.098L3.076 8.735A.5.5 0 0 0 3.5 9.5h.191l-1.638 3.276a.5.5 0 0 0 .447.724H7V16h2v-2.5h4.5a.5.5 0 0 0 .447-.724L12.31 9.5h.191a.5.5 0 0 0 .424-.765L10.902 5.5H11a.5.5 0 0 0 .416-.777l-3-4.5zM6.437 4.758A.5.5 0 0 0 6 4.5h-.066L8 1.401 10.066 4.5H10a.5.5 0 0 0-.424.765L11.598 8.5H11.5a.5.5 0 0 0-.447.724L12.69 12.5H3.309l1.638-3.276A.5.5 0 0 0 4.5 8.5h-.098l2.022-3.235a.5.5 0 0 0 .013-.507z"/>
+            </svg>
+            ECO-It
+          </h1>
+          <div className='col-10 col-lg-4'></div>
+
+          <Button className='col-5 col-lg-2 boutonConnection' onClick = {this.handleClickLogin}>Connection</Button>  {/*Button to show modal login*/}
           <Modal show = {this.state.showModalLogin}>
               <Modal.Header>
                 Connection
               </Modal.Header>
               <Modal.Body>
-                  <p>
-                    E-mail
-                    <input name = "E-mail" type = "email" placeholder='Entrez votre E-mail' onChange = {this.handleChangeMail}></input>
-                  </p>
-                  <p>
-                    Mot de Passe
-                    <input type = "password" placeholder='Entrez votre Mot de passe' onChange = {this.handleChangePassword}></input>
-                  </p>
+                  <div className='row mt-3'><p className='col-3'>E-mail: </p><input className='col-9'  name = "E-mail" type = "email" placeholder='Entrez votre E-mail' onChange = {this.handleChangeMail}></input>
+                  </div>
+                  
+                  <div className='row mt-3'><p className='col-3'>Mot de Passe: </p><input className='col-9'  type = "password" placeholder='Entrez votre Mot de passe' onChange = {this.handleChangePassword}></input>
+                  </div>
               </Modal.Body>
               <Modal.Footer>
                 {logInButton}
@@ -214,8 +234,9 @@ export default class App extends Component {
               </Modal.Footer>
           </Modal>
 
-
-          <Button onClick = {()=>{this.handleClickSignIn()}}>Inscription</Button> {/*Button to show modal SignIn*/}
+          
+          <div className='col-2 col-lg-1'></div>
+          <Button  className='col-5 col-lg-2 boutonInsciption' onClick = {()=>{this.handleClickSignIn()}}>Inscription</Button> {/*Button to show modal SignIn*/}
           <Modal show = {this.state.showModalSignIn}>
             <Modal.Header>
                 <p>Inscription</p>
@@ -236,9 +257,11 @@ export default class App extends Component {
               <Button onClick = {()=>{this.handleClickSignIn()}}>Cancel</Button>
             </Modal.Footer>
           </Modal>
+          </div>
       </header>
       <main className="App-header">
         {maincontent}
+        
       </main>
     </>  
     )

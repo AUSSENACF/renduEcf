@@ -11,6 +11,7 @@ const db = new sqlite3.Database("ecoItDbMain.db", (err) =>{
     db.run(`CREATE TABLE ProfilTeacher(mail TEXT, firstname TEXT , adminAcceptance TEXT, description TEXT, ImgPath TEXT, PRIMARY KEY (mail))`);
     db.run(`CREATE TABLE Lesson(mail TEXT, title TEXT, description TEXT, imgPath TEXT,lessonStatus BOOL, PRIMARY KEY (title))`);
     db.run(`CREATE TABLE Section(lessonId INT, title TEXT, PRIMARY KEY(title))`);
+    db.run(`CREATE TABLE Cour(SectionId INT, title TEXT, videoLink TEXT, description TEXT, PRIMARY KEY(title))`);
     /*db.run(`INSERT INTO Lesson(mail ,title , description, imgPath)VALUES(?, ?, ?, ?)`,["azertyyui@zer.fr","azert","azerty@zer.fr","azertytrde!4"], 
     (err) =>{
         if(err)return console.error(err.message)    }
@@ -18,7 +19,7 @@ const db = new sqlite3.Database("ecoItDbMain.db", (err) =>{
 
     );*/
     /*
-    db.each(`SELECT * FROM Section`,(err, data) =>{
+    db.all(`SELECT * From User `,(err, data) =>{
         if (err)
            throw err   
         

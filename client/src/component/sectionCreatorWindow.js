@@ -29,7 +29,7 @@ export default class SectionCreatorWindow extends Component {
 
         }
         this.modalReset = () =>{
-            this.setState({lessonTitle : "", lessonDesc : "", lessonImgFile:null , exempleLessonImgFile : null})
+            this.setState({})
             this.props.parentCallbackSection()
         }
         this.handleChangeTitle = (e)=>{

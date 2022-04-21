@@ -172,6 +172,18 @@ app.post('/getLessonList',(req,res)=>{
         })
     
 })
+app.post('/getSectionList',(req,res)=>{
+
+    const db = new sqlite3.Database("ecoItDbMain.db",(err)=>{
+        if(err) return console.error(err.message);
+            
+            db.all(`SELECT rowId, title FROM Section WHERE lessonId = '${req.body.message[0]}'`,(err,data)=>{
+                res.send(data)
+            })
+            db.close((err)=>{if(err) return console.error(err.message)});
+        })
+    
+})
 app.post('/saveSection', (req,res)=>{
     console.log(req.body.message[0])
     const db = new sqlite3.Database("ecoItDbMain.db",(err)=>{
@@ -195,10 +207,94 @@ app.post('/saveSection', (req,res)=>{
         })
     })
 })
+app.post('/saveCour', (req,res)=>{
+    console.log(req.body.message[0])
+    const db = new sqlite3.Database("ecoItDbMain.db",(err)=>{
+        if(err) return console.error(err.message);
+        
+        db.run(`INSERT INTO Cour(sectionId, title, videoLink, description) VALUES(?, ?, ?, ?)`,[req.body.message[0], req.body.message[1], req.body.message[2], req.body.message[3]],
+        (err)=>{if(err){// if sql err exist
+            if(err.errno === 19){ //it's because primary key "email" already exist 
+                res.send("ce titre de cour existe déja")
+                console.error(err.message)
+            }else{// it's another error
+                console.log(err)
+            }
+        }else{
+            res.send("data saved")
+        }
+    db.close((err) =>{
+            if (err) return console.error(err.message);
+            // validate data save for start saving profile image
+    });
+        })
+    })
+})
+app.post('/getFormationList', (_,res) =>{
+    const db = new sqlite3.Database("ecoItDbMain.db",(err)=>{
+        if(err) return console.error(err.message);
+        db.all(`SELECT rowid, title, description, imgPath FROM Lesson`,
+        (err,data)=>{if(err)return console.error(err.message)
+            res.send(data)
+        db.close((err) =>{
+            if (err) return console.error(err.message);
+            // validate data save for start saving profile image
+            });
+        })
+    })
+})
+app.post('/getApprenantformation',(req,res) =>{
+    
+    const db = new sqlite3.Database("ecoItDbMain.db",(err)=>{
+        if(err)return console.error(err.message)
+        db.get(`SELECT title From Lesson WHERE rowid = ${req.body.message[0]}`,(err,data)=>{
+            if(err) return console.error(err.message)
+            res.send(data)
+        
+        })
+        db.close((err) =>{
+            if (err) return console.error(err.message);
+            // validate data save for start saving profile image
+        });
+    })
+})
+app.post('/getCour',(req,res)=>{
+    
+    const db = new sqlite3.Database("ecoItDbMain.db", (err)=>{
+        if(err)return console.error(err.message)
+        console.log(req.body.message)
+            db.all(`SELECT title, videoLink, description From Cour WHERE SectionId = ${req.body.message.rowid}`,(err,data)=>{
+                res.send(data)
+                db.close((err) =>{
+                    if (err) return console.error(err.message);
+                    // validate data save for start saving profile image
+                });
+                
+            })
+        }) 
+        
+        
 
+        
+        //db.get(`SELECT title, ImgPath, description From Cour WHERE SectionId = ${}`)
+    })
+
+app.post('/getProfilTeacherList', (_,res) =>{
+    const db = new sqlite3.Database("ecoItDbMain.db",(err)=>{
+        if(err) return console.error(err.message);
+        db.all(`SELECT mail, firstname, adminAcceptance, description, ImgPath FROM ProfilTeacher `,(err,data)=>{if(err)return console.error(err.message)
+            res.send(data)
+        db.close((err) =>{
+            if (err) return console.error(err.message);
+            // validate data save for start saving profile image
+                });
+            })
+        })
+})
 app.get('/*',(_,res) =>{
     res.sendFile(path.join(__dirname,'./client/build/index.html'))
 })
 app.listen(PORT, ()=>{
     console.log(`le serveur est lancé sur le port : ${PORT}`)
 });
+
